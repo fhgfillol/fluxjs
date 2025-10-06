@@ -1,0 +1,22 @@
+{
+  "name": "@fhgfillol/fluxjs",
+  "version": "1.0.0",
+  "description": "A lightweight Entity Component System for JavaScript",
+  "main": "dist/ecs.js",
+  "module": "dist/ecs.esm.js",
+  "scripts": {
+    "build": "echo 'Configurar build luego'",
+    "example": "echo 'Configurar ejemplo luego'"
+  },
+  "keywords": ["ecs", "entity-component-system", "javascript", "game-development"],
+  "author": "Fabián <fhgarcia@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fhgfillol/fluxjs.git"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/fhgfillol"
+  }
+}
