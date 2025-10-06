@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluxJS Particle Simulation</title>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script type="module">
+        import { startParticleSim } from './particle-sim.js';
+
+        const canvas = document.getElementById('gameCanvas');
+        startParticleSim({
+            canvas,
+            particleCount: 50,
+            width: 800,
+            height: 600
+        });
+    </script>
+</body>
+
+</html>
