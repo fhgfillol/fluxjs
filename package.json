@@ -1,6 +1,6 @@
 {
   "name": "@fhgfillol/fluxjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight Entity Component System for JavaScript",
   "main": "dist/ecs.cjs.js",
   "module": "dist/ecs.esm.js",
