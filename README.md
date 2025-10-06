@@ -22,6 +22,99 @@ npm install @fhgfillol/fluxjs
 Create a simple simulation with bouncing balls:
 
 ```javascript
+// Example components for FluxJS ECS
+import { BaseComponent } from './ecs.js';
+
+export class Transform extends BaseComponent {
+  constructor() {
+    super();
+    this.x = 0;
+    this.y = 0;
+    this.scale = 1; // Escala para el tamaño de la bolita
+  }
+  reset() {
+    this.x = 0;
+    this.y = 0;
+    this.scale = 1;
+  }
+}
+
+export class Rigidbody extends BaseComponent {
+  constructor() {
+    super();
+    this.vx = 0; // Velocidad en x
+    this.vy = 0; // Velocidad en y
+  }
+  reset() {
+    this.vx = 0;
+    this.vy = 0;
+  }
+}
+
+export class Render extends BaseComponent {
+  constructor() {
+    super();
+    this.r = 255;
+    this.g = 255;
+    this.b = 255;
+  }
+  reset() {
+    this.r = 255;
+    this.g = 255;
+    this.b = 255;
+  }
+}
+```
+
+```javascript
+// Example systems for FluxJS ECS
+import { Transform, Rigidbody, Render } from './components.js';
+
+export function PhysicsSystem(dt, ecs, width, height) {
+  const entities = ecs.queryEntities(Transform, Rigidbody);
+  const gravity = 500;
+  for (let i = 0; i < entities.length; i++) {
+    const entityId = entities[i];
+    const transform = ecs.getComponent(entityId, Transform);
+    const rigidbody = ecs.getComponent(entityId, Rigidbody);
+
+    rigidbody.vy += gravity * dt;
+
+    transform.x += rigidbody.vx * dt;
+    transform.y += rigidbody.vy * dt;
+
+    const speed = Math.sqrt(rigidbody.vx * rigidbody.vx + rigidbody.vy * rigidbody.vy);
+    transform.scale = 1 + speed * 0.001;
+
+    if (transform.y > height - 20 * transform.scale) {
+      transform.y = height - 20 * transform.scale;
+      rigidbody.vy *= -0.98;
+    }
+
+    if (transform.x > width + 20 * transform.scale) {
+      transform.x = -20 * transform.scale;
+    } else if (transform.x < -20 * transform.scale) {
+      transform.x = width + 20 * transform.scale;
+    }
+  }
+}
+
+export function RenderSystem(dt, ecs, ctx) {
+  const entities = ecs.queryEntities(Transform, Render);
+  for (let i = 0; i < entities.length; i++) {
+    const entityId = entities[i];
+    const transform = ecs.getComponent(entityId, Transform);
+    const render = ecs.getComponent(entityId, Render);
+    ctx.beginPath();
+    ctx.arc(transform.x, transform.y, 20 * transform.scale, 0, 2 * Math.PI);
+    ctx.fillStyle = `rgb(${render.r}, ${render.g}, ${render.b})`;
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+```
+
+```javascript
 import { ECS, Entity } from '@fhgfillol/fluxjs';
 import { Transform, Rigidbody, Render } from './components.js';
 import { PhysicsSystem, RenderSystem } from './systems.js';
@@ -40,10 +133,16 @@ ecs.registerComponent(Render);
 
 // Create a ball
 const ball = ecs.activateEntity();
-ecs.enableComponent(ball, Transform).x = 400;
-ecs.enableComponent(ball, Transform).y = 100;
-ecs.enableComponent(ball, Rigidbody).vx = 100;
-ecs.enableComponent(ball, Render).r = 255;
+
+const transform = ecs.enableComponent(ball, Transform);
+transform.x = 400;
+transform.y = 100;
+
+const rigidbody = ecs.enableComponent(ball, Rigidbody);
+rigidbody.vx = 100;
+
+const render = ecs.enableComponent(ball, Render);
+render.r = 255;
 
 // Add systems
 ecs.addSystem((dt, ecs) => PhysicsSystem(dt, ecs, 800, 600));
