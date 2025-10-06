@@ -90,7 +90,7 @@ Contributions are welcome! Fork the repo, make changes, and submit a pull reques
 ## Support
 Love FluxJS? Help keep it alive:
 - ⭐ Star this repository on [GitHub](https://github.com/fhgfillol/fluxjs)!
-- 💖 Sponsor via [GitHub Sponsors](https://github.com/sponsors/fhgfillol)
+- ☕ [Support me on Ko-fi](https://ko-fi.com/fhgfillol)
 - ☕ [Buy me a coffee](https://buymeacoffee.com/fhgfillol)
 
 ## License
