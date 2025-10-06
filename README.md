@@ -88,12 +88,10 @@ Open http://localhost:5173 in your browser to see the demo.
 Contributions are welcome! Fork the repo, make changes, and submit a pull request. Check out the Contributing Guide for details.
 
 ## Support
-
 Love FluxJS? Help keep it alive:
-
-- ⭐ Star this repository on GitHub!
-- 💖 Sponsor via GitHub Sponsors
-- ☕ Buy me a coffee
+- ⭐ Star this repository on [GitHub](https://github.com/fhgfillol/fluxjs)!
+- 💖 Sponsor via [GitHub Sponsors](https://github.com/sponsors/fhgfillol)
+- ☕ [Buy me a coffee](https://buymeacoffee.com/fhgfillol)
 
 ## License
 
