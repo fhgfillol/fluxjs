@@ -15,8 +15,6 @@ A lightweight and flexible **Entity Component System (ECS)** for JavaScript, des
 npm install @fhgfillol/fluxjs
 ```
 
-**Note**: FluxJS is not yet published to NPM. For now, clone the repository to try it out.
-
 ## Quick Start
 
 Create a simple simulation with bouncing balls:
