@@ -6,7 +6,7 @@ export class Transform extends BaseComponent {
     super();
     this.x = 0;
     this.y = 0;
-    this.scale = 1; // Escala para el tamaño de la bolita
+    this.scale = 1;
   }
   reset() {
     this.x = 0;
@@ -18,8 +18,8 @@ export class Transform extends BaseComponent {
 export class Rigidbody extends BaseComponent {
   constructor() {
     super();
-    this.vx = 0; // Velocidad en x
-    this.vy = 0; // Velocidad en y
+    this.vx = 0;
+    this.vy = 0;
   }
   reset() {
     this.vx = 0;
