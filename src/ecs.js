@@ -1,14 +1,16 @@
 // FluxJS: A lightweight Entity Component System for JavaScript
 export class ECS {
+    static nextId = 0;
+
     constructor(maxEntities) {
         this.maxEntities = maxEntities;
         this.components = {};
-        this.componentClassToBit = new Map();
         this.registeredBits = [];
         this.nextBit = 1;
         this.freeEntityIds = [];
         this.activeEntities = [];
         this.systems = [];
+        this.id = ECS.nextId++;
 
         this.registerComponent(Entity);
 
@@ -18,13 +20,15 @@ export class ECS {
     }
 
     registerComponent(componentClass) {
-        if (!this.componentClassToBit.has(componentClass)) {
-            const bit = this.nextBit;
-            this.componentClassToBit.set(componentClass, bit);
-            this.components[bit] = new Array(this.maxEntities).fill(null).map(() => new componentClass());
-            this.registeredBits.push(bit);
-            this.nextBit *= 2;
+        if (!componentClass.bits) {
+            componentClass.bits = [];
         }
+
+        componentClass.bits[this.id] = this.nextBit;
+        const bit = componentClass.bits[this.id];
+        this.components[bit] = new Array(this.maxEntities).fill(null).map(() => new componentClass());
+        this.registeredBits.push(bit);
+        this.nextBit *= 2;
     }
 
     activateEntity() {
@@ -57,7 +61,7 @@ export class ECS {
     }
 
     enableComponent(entityId, componentClass) {
-        const bit = this.componentClassToBit.get(componentClass);
+        const bit = componentClass.bits[this.id];
         if (bit) {
             const entity = this.components[1][entityId];
             entity.dirtyMask |= bit;
@@ -67,7 +71,7 @@ export class ECS {
     }
 
     disableComponent(entityId, componentClass) {
-        const bit = this.componentClassToBit.get(componentClass);
+        const bit = componentClass.bits[this.id];
         if (bit) {
             const entity = this.components[1][entityId];
             entity.dirtyMask &= ~bit;
@@ -75,7 +79,7 @@ export class ECS {
     }
 
     getComponent(entityId, componentClass) {
-        const bit = this.componentClassToBit.get(componentClass);
+        const bit = componentClass.bits[this.id];
         return this.components[bit][entityId];
     }
 
@@ -102,12 +106,13 @@ export class ECS {
     queryEntities(...componentClasses) {
         let requiredMask = 1;
         for (let i = 0; i < componentClasses.length; i++) {
-            const bit = this.componentClassToBit.get(componentClasses[i]);
+            const bit = componentClasses[i].bits[this.id];
             if (bit === undefined) {
                 throw new Error(`Componente no registrado: ${componentClasses[i].name}`);
             }
             requiredMask |= bit;
         }
+
         const result = [];
         for (let i = 0; i < this.activeEntities.length; i++) {
             const entityId = this.activeEntities[i];

@@ -1,12 +1,14 @@
 {
   "name": "@fhgfillol/fluxjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight Entity Component System for JavaScript",
   "main": "dist/ecs.cjs.js",
   "module": "dist/ecs.esm.js",
   "scripts": {
     "build": "vite build",
-    "example": "vite serve examples"
+    "example": "vite serve examples",
+    "examplefluxjs": "vite serve examples/fluxjs",
+    "exampleoop": "vite serve examples/oop"
   },
   "keywords": [
     "ecs",
@@ -14,7 +16,7 @@
     "javascript",
     "game-development"
   ],
-  "author": "Facundo Fillol <tuemail@example.com>",
+  "author": "Fabián García <fhgarcia@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",

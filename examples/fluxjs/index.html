@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluxJS</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #1B263B;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+
+        #gameCanvas {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            background-color: #263238;
+        }
+
+        #info {
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            margin: 0 auto;
+            color: white;
+            font-size: 18px;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    <div id="info"></div>
+    <script type="module">
+        import { BaseComponent, ECS } from '../../src/ecs.js';
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const ASPECT_RATIO = 1280 / 720;
+        const FDT = 1 / 60;
+
+        function resizeCanvas() {
+            const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+            canvas.style.transform = `scale(${scale})`;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Test component
+        class Transform extends BaseComponent {
+            constructor() {
+                super();
+                this.position = { x: 0, y: 0 };
+            }
+
+            reset() {
+                this.position.x = 0;
+                this.position.y = 0;
+            }
+        }
+
+        class RigidBody extends BaseComponent {
+            constructor() {
+                super();
+                this.acceletarion = { x: 0, y: 0 };
+                this.velocity = { x: 0, y: 0 };
+            }
+
+            reset() {
+                this.acceletarion.x = 0;
+                this.acceletarion.y = 0;
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+            }
+        }
+
+        class Collider extends BaseComponent {
+            constructor() {
+                super();
+                this.radius = 0;
+            }
+
+            reset() {
+                this.radius = 0;
+            }
+        }
+
+        class Renderable extends BaseComponent {
+            constructor() {
+                super();
+                this.color = { r: 0, g: 0, b: 0 };
+            }
+
+            reset() {
+                this.color.r = 0;
+                this.color.g = 0;
+                this.color.b = 0;
+            }
+        }
+
+        const applyGravity = (dt) => {
+            const entities = ecs.queryEntities(RigidBody);
+            for (let i = 0; i < entities.length; i++) {
+                const id = entities[i];
+                const rigidbody = ecs.getComponent(id, RigidBody);
+                rigidbody.velocity.y += 500 * dt;
+            }
+        };
+
+        const applyVelocity = (dt) => {
+            const entities = ecs.queryEntities(Transform, RigidBody);
+            for (let i = 0; i < entities.length; i++) {
+                const id = entities[i];
+                const transform = ecs.getComponent(id, Transform);
+                const rigidbody = ecs.getComponent(id, RigidBody);
+                transform.position.x += rigidbody.velocity.x * dt;
+                transform.position.y += rigidbody.velocity.y * dt;
+            }
+        };
+
+        const applyCollition = (dt) => {
+            const entities = ecs.queryEntities(Transform, Collider, RigidBody);
+            for (let i = 0; i < entities.length; i++) {
+                const id = entities[i];
+                const transform = ecs.getComponent(id, Transform);
+                const collider = ecs.getComponent(id, Collider);
+                const rigidbody = ecs.getComponent(id, RigidBody);
+
+                if (transform.position.y + collider.radius > canvas.height) {
+                    transform.position.y = canvas.height - collider.radius;
+                    rigidbody.velocity.y *= -1;
+                    rigidbody.velocity.x = -100 + Math.random() * 200;
+                }
+
+                if (transform.position.x - collider.radius < 0) {
+                    transform.position.x = collider.radius;
+                    rigidbody.velocity.x *= -1;
+                } else if (transform.position.x + collider.radius > canvas.width) {
+                    transform.position.x = canvas.width - collider.radius;
+                    rigidbody.velocity.x *= -1;
+                }
+            }
+        };
+
+        const renderEntity = (dt) => {
+            const entities = ecs.queryEntities(Transform, Collider, Renderable);
+            for (let i = 0; i < entities.length; i++) {
+                const id = entities[i];
+                const transform = ecs.getComponent(id, Transform);
+                const collider = ecs.getComponent(id, Collider);
+                const renderable = ecs.getComponent(id, Renderable);
+
+                ctx.beginPath();
+                ctx.arc(transform.position.x, transform.position.y, collider.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgb(${renderable.color.r}, ${renderable.color.g}, ${renderable.color.b})`;
+                ctx.fill();
+                ctx.closePath();
+            }
+        };
+
+        // ECS
+        const ecs = new ECS(30000);
+        ecs.registerComponent(Transform);
+        ecs.registerComponent(RigidBody);
+        ecs.registerComponent(Collider);
+        ecs.registerComponent(Renderable);
+
+        ecs.addSystem(applyGravity);
+        ecs.addSystem(applyVelocity);
+        ecs.addSystem(applyCollition);
+        ecs.addSystem(renderEntity);
+
+        let balls = 0;
+        function createEntity() {
+            balls++;
+            const id = ecs.activateEntity();
+            const transform = ecs.enableComponent(id, Transform);
+            const rigidbody = ecs.enableComponent(id, RigidBody);
+            const collider = ecs.enableComponent(id, Collider);
+            const renderable = ecs.enableComponent(id, Renderable);
+
+            transform.position.x = collider.radius + Math.random() * (canvas.width - collider.radius * 2);
+            transform.position.y = Math.random() * (canvas.height / 2);
+            rigidbody.velocity.x = 0;
+            rigidbody.velocity.y = 0;
+            collider.radius = 10 + Math.random() * 20;
+            renderable.color.r = Math.floor(Math.random() * 255);
+            renderable.color.g = Math.floor(Math.random() * 255);
+            renderable.color.b = Math.floor(Math.random() * 255);
+        }
+
+        let lastTime = performance.now();
+        function gameLoop() {
+            const currentTime = performance.now();
+            let dt = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+
+            if (dt <= FDT) {
+                for (let i = 0; i < 50; i++) {
+                    createEntity();
+                }
+
+                document.getElementById('info').innerText = `FluxJS Balls: ${balls} - FPS: ${Math.round(1 / dt)}`;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ecs.update(FDT);
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>
+</body>
+
+</html>
